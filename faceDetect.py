@@ -1,10 +1,18 @@
-from flask import Flask, render_template, Response
+import cloudinary.uploader
+from flask import Flask, render_template, Response, request, redirect,flash,jsonify,send_file
 from flask_opencv_streamer.streamer import Streamer
 import cv2
 import threading
 from deepface import DeepFace
+import cloudinary
+          
+cloudinary.config( 
+  cloud_name = "dmfxvx5vn", 
+  api_key = "429888616999743", 
+  api_secret = "vY_6H1ltWNDXK-vghY3FrUHffpo" 
+)
 
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__)
 
 # Initialize global variables
 face_match = False
@@ -20,7 +28,7 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 # Initialize Streamer
-port = 8000
+port = 8001
 require_login = False
 streamer = Streamer(port, require_login)
 
@@ -62,6 +70,7 @@ def capture_video():
             if not streamer.is_streaming:
                 streamer.start_streaming()
 
+
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
@@ -76,6 +85,22 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(streamer.generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        flash('No file part') 
+        return redirect(request.url)
+    file=request.files['file']
+    if file.filename=='': 
+        flash('No selected file')
+        return redirect(request.url)
+    if file: 
+        # Upload the file to Cloudinary
+        result = cloudinary.uploader.upload(file)
+        print("Cloudinary Result:", result)
+        # return render_template("upload.html",file=file)
+        return redirect(result['secure_url']) 
 
 if __name__ == '__main__':
     video_thread = threading.Thread(target=capture_video, daemon=True)

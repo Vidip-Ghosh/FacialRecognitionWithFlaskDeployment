@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Image</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <h2>Select an image to upload</h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" class="form-control" autocomplete="off" />
+      <input type="submit" value="Submit" />
+    </form>
+
+    <!-- Display uploaded images if any -->
+    {% if files %}
+    <h3>Uploaded Images</h3>
+    <div>
+      {% for file in files %}
+      <img
+        src="{{ file }}"
+        alt="Uploaded Image"
+        style="max-width: 300px; max-height: 300px; margin: 10px"
+      />
+      {% endfor %}
+    </div>
+    {% endif %}
+  </body>
+</html>
